@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.px.ifp.spc.mapper.SpcNoteMapper">
+    <select id="getLatestNoteByJobIds" resultType="com.px.ifp.spc.entity.LastSpcNoteDO">
+        SELECT
+        si.job_id,
+        sn.BUSINESS_KEY,
+        sn.CONTENT,
+        sn.CREATOR,
+        sn.CREATE_TIME
+        FROM
+        spc_note sn
+        JOIN
+        spc_alarm_event sar
+        ON
+        sn.BUSINESS_KEY = sar.ID
+        JOIN
+        spc_indicator si
+        ON
+        si.id = sar.INDICATOR_ID
+        WHERE
+        1=1
+        <if test="facCode != null and facCode != ''">
+           and si.FAC_CODE = #{facCode}
+        </if>
+        and si.job_id IN
+        <foreach item="jobId" index="index" collection="jobIds" open="(" separator="," close=")">
+            #{jobId}
+        </foreach>
+        AND
+        sn.CREATE_TIME = (
+        SELECT MAX(sn2.CREATE_TIME)
+        FROM spc_note sn2
+        JOIN spc_alarm_event sar2 ON sn2.BUSINESS_KEY = sar2.ID
+        JOIN spc_indicator si2 ON si2.id = sar2.INDICATOR_ID
+        WHERE si2.job_id = si.job_id
+        )
+    </select>
+
+    <select id="selectAnalysisAlarmNote" resultType="com.px.ifp.spc.bo.SpcAlarmNoteBO">
+        SELECT
+            sar.id as analysis_id,
+            sn.id as spc_note_id,
+            sar.job_id as job_id ,
+            sar.oos as oos,
+            sar.ooc as ooc,
+            sar.oow as oow,
+            sar.oo3 as oo3,
+            sar.normal as normal,
+            sar.segment_id as alarmSegmentId,
+            sar.start_time as alarmStartTime,
+            SAR.end_time as alarmEndTime,
+            sar.peek_value AS point_value,
+            sar.peek_value_time as event_time,
+            sn.content as content,
+            sn.update_time as spc_note_upadte_time,
+            sn.tag as tag,
+            sn.update_time as spc_note_upadte_time
+    FROM
+            spc_alarm_event sar
+        RIGHT JOIN
+            spc_note sn ON sar.id = sn.business_key
+        WHERE
+            sn.indicator_id is not null
+        <if test="facCode != null and facCode != ''">
+            and sar.FAC_CODE = #{facCode}
+        </if>
+        <if test="startTime != null">
+            and <![CDATA[ sar.peek_value_time >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null">
+            and <![CDATA[ sar.peek_value_time <= #{endTime} ]]>
+        </if>
+        <if test="jobId != null">
+            and sar.job_id = #{jobId}
+        </if>
+        <if test="spcAnalysisResultId != null">
+            and sar.id = #{spcAnalysisResultId}
+        </if>
+        <if test="tag != null">
+            and sn.tag = #{tag}
+        </if>
+        ORDER BY
+            sar.id DESC
+    </select>
+</mapper>

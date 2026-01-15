@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.px.ifp.spc.mapper.SpcAnalysisResultMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.px.ifp.spc.entity.SpcAnalysisResult">
+        <id column="id" property="id" />
+        <result column="indicator_id" property="indicatorId" />
+        <result column="job_id" property="jobId" />
+        <result column="indicator_name" property="indicatorName" />
+        <result column="class_code" property="classCode" />
+        <result column="indicator_level" property="indicatorLevel" />
+        <result column="point" property="point" />
+        <result column="target_value" property="targetValue" />
+        <result column="ucl_value" property="uclValue" />
+        <result column="lcl_value" property="lclValue" />
+        <result column="uwl_value" property="uwlValue" />
+        <result column="lwl_value" property="lwlValue" />
+        <result column="usl_value" property="uslValue" />
+        <result column="lsl_value" property="lslValue" />
+        <result column="u3l_value" property="u3lValue" />
+        <result column="l3l_value" property="l3lValue" />
+        <result column="uacl_value" property="uaclValue" />
+        <result column="lacl_value" property="laclValue" />
+        <result column="point_value" property="pointValue" />
+        <result column="oos" property="oos" />
+        <result column="oow" property="oow" />
+        <result column="ooc" property="ooc" />
+        <result column="oo3" property="oo3" />
+        <result column="normal" property="normal" />
+        <result column="event_time" property="eventTime" />
+        <result column="create_time" property="createTime" />
+        <result column="FAC_CODE" property="facCode" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, indicator_id, job_id, indicator_name, class_code, indicator_level, point, target_value, ucl_value, lcl_value, uwl_value, lwl_value, usl_value, lsl_value, u3l_value, l3l_value, point_value, oos, oow, ooc, oo3, normal, event_time, create_time, FAC_CODE
+    </sql>
+
+    <select id="selectAllList" resultType="com.px.ifp.spc.entity.SpcAnalysisResult">
+        SELECT *
+        FROM spc_analysis_result
+        WHERE 1=1
+        <if test="jobIdList != null and jobIdList.size() > 0">
+            AND job_id IN
+            <foreach collection="jobIdList" item="jid" open="(" separator="," close=")">
+                #{jid}
+            </foreach>
+        </if>
+        <if test="startTime != null">
+            AND event_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND event_time &lt;= #{endTime}
+        </if>
+        <if test="alarmType != null and alarmType != ''">
+            <choose>
+                <when test="alarmType.equalsIgnoreCase('oos')">
+                    AND oos = true
+                </when>
+                <when test="alarmType.equalsIgnoreCase('oow')">
+                    AND oow = true
+                </when>
+                <when test="alarmType.equalsIgnoreCase('ooc')">
+                    AND ooc = true
+                </when>
+                <when test="alarmType.equalsIgnoreCase('oo3')">
+                    AND oo3 = true
+                </when>
+                <when test="alarmType.equalsIgnoreCase('normal')">
+                    AND normal = true
+                </when>
+            </choose>
+        </if>
+        ORDER BY event_time DESC
+    </select>
+
+    <select id="selectResultCount" resultType="com.px.ifp.spc.bo.SpcAnalysisResultBO">
+        select job_id as jobId, sum(oos) as oosCount,sum(oow) as oowCount,sum(ooc) as oocCount,sum(oo3) as oo3Count,sum(normal) as normalCount from spc_analysis_result
+        where 1=1
+        <if test="facCode != null and facCode != ''">
+            and FAC_CODE = #{facCode}
+        </if>
+        <if test="jobIdList != null">
+            and job_id in
+            <foreach collection="jobIdList" item="jobId" open="(" separator="," close=")">
+                #{jobId}
+            </foreach>
+        </if>
+        <if test="pointList != null">
+            and point in
+            <foreach collection="pointList" item="point" open="(" separator="," close=")">
+                #{point}
+            </foreach>
+        </if>
+        <if test="classCode != null and classCode != ''">
+            and class_code = #{classCode}
+        </if>
+        <if test="indicatorLevel != null and indicatorLevel != ''">
+            and indicator_level = #{indicatorLevel}
+        </if>
+        <if test="startTime != null">
+            and <![CDATA[ event_time >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null">
+            and <![CDATA[ event_time <= #{endTime} ]]>
+        </if>
+        group by job_id
+    </select>
+
+    <select id="selectAnalysisResultNotes" resultType="com.px.ifp.spc.bo.SpcAnalysisResultNoteBO">
+        SELECT
+            sar.id as id,
+            sar.job_id as jobId,
+            si.system_code as systemCode,
+            si.id as indicatorId,
+            si.indicator_name as IndicatorName,
+            si.indicator_level as IndicatorLevel,
+            sar.`point` as point,
+            si.point_unit as PointUnit,
+            si.class_code,
+            si.start_value as startValue,
+            si.step as step,
+            si.target_value as targetValue,
+            si.end_value as endValue,
+            sar.ucl_value as uclValue,
+            sar.lcl_value as lclValue,
+            sar.uwl_value as uwlValue,
+            sar.lwl_value as lwlValue,
+            sar.usl_value as uslValue,
+            sar.lsl_value as lslValue,
+            sar.u3l_value as u3lValue,
+            sar.l3l_value as l3lValue,
+            sar.oos as oos,
+            sar.ooc as ooc,
+            sar.oow as oow,
+            sar.oo3 as oo3,
+            sar.normal as normal,
+            sar.point_value as pointValue,
+            sar.event_time as eventTime,
+            sn.content as content
+        FROM
+            spc_analysis_result sar
+        JOIN
+            spc_indicator si ON sar.indicator_id = si.id
+        LEFT JOIN
+            spc_note sn ON sar.id = sn.business_key
+        WHERE
+        1 = 1
+        <if test="facCode != null and facCode != ''">
+            and si.FAC_CODE = #{facCode}
+        </if>
+        <if test="classCode != null and classCode != ''">
+            and si.class_code = #{classCode}
+        </if>
+        <if test="configType != null and configType != ''">
+            and si.config_type = #{configType}
+        </if>
+        <if test="startTime != null">
+            and <![CDATA[ sar.event_time >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null">
+            and <![CDATA[ sar.event_time <= #{endTime} ]]>
+        </if>
+        <choose>
+            <when test="pointList != null and pointList.size > 0">
+                AND sar.point IN
+                <foreach item="item" index="index" collection="pointList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </when>
+            <when test="jobIdList != null and jobIdList.size > 0">
+                AND sar.job_id IN
+                <foreach item="item" index="index" collection="jobIdList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </when>
+            <when test="systemCodeList != null and systemCodeList.size > 0">
+                AND si.system_code IN
+                <foreach item="item" index="index" collection="systemCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </when>
+        </choose>
+        ORDER BY
+        sar.event_time DESC
+    </select>
+
+
+    <!-- 查询 spc_indicator 和 spc_analysis_result 表，基于 system_code 和多个 point -->
+    <select id="queryAnalysisResultsBySystemAndPoints" resultType="com.px.ifp.spc.bo.SpcAnalysisSimpleResultBO">
+        SELECT
+            si.job_id,
+            si.point ,
+            sar.POINT_VALUE as point_value,
+            sar.OOS as oos,
+            sar.OOW as oow,
+            sar.OOC as ooc,
+            sar.OO3 as oo3,
+            sar.NORMAL as normal,
+            MAX(sar.EVENT_TIME) AS event_time
+        FROM
+            spc_analysis_result sar
+        JOIN
+             spc_indicator si
+        ON
+            si.id = sar.INDICATOR_ID
+        WHERE
+            si.system_code = #{systemCode}
+        <if test="facCode != null and facCode != ''">
+            and si.FAC_CODE = #{facCode}
+        </if>
+        <if test="points != null">
+            AND si.point IN
+            <foreach collection="points" item="point" open="(" separator="," close=")">
+                #{point}
+            </foreach>
+        </if>
+        <if test="startTime != null">
+            and <![CDATA[ sar.event_time >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null">
+            and <![CDATA[ sar.event_time <= #{endTime} ]]>
+        </if>
+        GROUP BY
+            si.job_id
+    </select>
+
+    <!-- 更新分析结果的segment_id -->
+    <update id="updateSegmentId">
+        UPDATE spc_analysis_result
+        SET segment_id = #{segmentId}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据segment_id查询分析结果详情 -->
+    <select id="selectBySegmentId" resultType="com.px.ifp.spc.entity.SpcAnalysisResult">
+        SELECT * FROM spc_analysis_result
+        WHERE segment_id = #{segmentId}
+        ORDER BY event_time ASC
+    </select>
+
+    <!-- 根据segment_id查询异常点数据 -->
+    <select id="selectAbnormalPointsBySegmentId" resultType="com.px.ifp.spc.entity.SpcAnalysisResult">
+        SELECT * FROM spc_analysis_result
+        WHERE segment_id = #{segmentId}
+        AND (oos = 1 OR oow = 1 OR ooc = 1 OR oo3 = 1 OR NORMAL = 1)
+        ORDER BY event_time ASC
+    </select>
+</mapper>

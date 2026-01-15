@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.28.158:8848
+        file-extension: yaml
+        namespace: ifp-prd
+      discovery:
+        server-addr: 192.168.28.158:8848
+        namespace: ifp-prd
