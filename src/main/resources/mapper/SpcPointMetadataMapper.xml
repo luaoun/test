@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.px.ifp.spc.mapper.SpcPointMetadataMapper">
+
+    <select id="getJobSystemPointByConditions" resultType="com.px.ifp.spc.dto.manager.request.QuerySpcIndicatorDTO">
+        SELECT
+        job_id,
+        system_code,
+        measure_code
+        FROM
+        spc_point_metadata
+        WHERE
+        1=1
+        <if test="facCode != null and facCode != ''">
+            and FAC_CODE = #{facCode}
+        </if>
+        <if test="conditions != null and conditions.size() > 0">
+            and
+            <foreach collection="conditions" item="condition" open="(" separator="OR" close=")">
+                (system_code = #{condition.systemCode} AND measure_code = #{condition.measure_code})
+            </foreach>
+        </if>
+    </select>
+    <select id="selectAllList" resultType="com.px.ifp.spc.entity.SpcPointMetadataDO">
+        SELECT *
+        FROM spc_point_metadata
+        WHERE deleted_id = 0
+        <if test="indicatorName != null and indicatorName != ''">
+            AND indicator_name LIKE CONCAT('%', #{indicatorName}, '%')
+        </if>
+        <if test="classCode != null and classCode != ''">
+            AND class_code = #{classCode}
+        </if>
+        <if test="systemCode != null and systemCode.size() > 0">
+            AND system_code IN
+            <foreach collection="systemCode" item="code" open="(" separator="," close=")">
+                #{code}
+            </foreach>
+        </if>
+        <if test="indicatorLevel != null and indicatorLevel != ''">
+            AND indicator_level = #{indicatorLevel}
+        </if>
+        <if test="measure_code != null and measure_code.size() > 0">
+            AND measure_code IN
+            <foreach collection="measure_code" item="pt" open="(" separator="," close=")">
+                #{pt}
+            </foreach>
+        </if>
+        <if test="jobId != null and jobId.size() > 0">
+            AND job_id IN
+            <foreach collection="jobId" item="jid" open="(" separator="," close=")">
+                #{jid}
+            </foreach>
+        </if>
+        <if test="configType != null and configType != ''">
+            AND config_type = #{configType}
+        </if>
+        ORDER BY fac_code ASC,indicator_level DESC
+    </select>
+
+    <select id="selectAllActiveIndicatorIds" resultType="java.lang.Long">
+        SELECT id
+        FROM spc_point_metadata
+        WHERE deleted_id = 0
+        AND enable_realtime_alarm = 1
+        ORDER BY id
+    </select>
+
+    <select id="selectAllActiveIndicators" resultType="com.px.ifp.spc.entity.SpcPointMetadataDO">
+        SELECT *
+        FROM spc_point_metadata
+        WHERE deleted_id = 0
+        AND enable_realtime_alarm = 1
+        ORDER BY id
+    </select>
+
+    <select id="selectAllIndicators" resultType="com.px.ifp.spc.entity.SpcPointMetadataDO">
+        SELECT *
+        FROM spc_point_metadata
+        WHERE deleted_id = 0
+        ORDER BY id
+    </select>
+
+    <select id="selectByIds" resultType="com.px.ifp.spc.entity.SpcPointMetadataDO">
+        SELECT *
+        FROM spc_point_metadata
+        WHERE deleted_id = 0
+          AND id IN
+        <foreach collection="indicatorIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY id
+    </select>
+
+
+    <insert id="insert" parameterType="com.px.ifp.spc.entity.SpcPointMetadataDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO spc_point_metadata (
+            job_id, indicator_name, class_code, system_code, indicator_level,
+            measure_code, measure_name, unit, area_code, fac_code,
+            data_type, precision_decimal, range_min, range_max, y_axis_min, y_axis_max,y_axis_step,
+            enable_realtime_alarm, enable_offline_chart,
+            target_value, ucl_value, lcl_value, uwl_value, lwl_value, usl_value, lsl_value,u3l_value,l3l_value,
+            equipment_id, equipment_name, ocap_template_id, attributes, updated_by, config_type,
+            enabled_spc_controlled, created_by, is_default
+        ) VALUES (
+            #{jobId}, #{indicatorName}, #{classCode}, #{systemCode}, #{indicatorLevel},
+            #{measureCode}, #{measureName}, #{pointUnit}, #{areaCode}, #{facCode},
+            #{dataType}, #{precisionDecimal}, #{rangeMin}, #{rangeMax}, #{yAxisMin}, #{yAxisMax},#{yAxisStep},
+            #{enableRealtimeAlarm}, #{enableOfflineChart},
+            #{targetValue}, #{uclValue}, #{lclValue}, #{uwlValue}, #{lwlValue}, #{uslValue}, #{lslValue}, #{u3lValue}, #{l3lValue},
+            #{equipmentId}, #{equipmentName}, #{ocapTemplateId}, #{attributes}, #{updatedBy}, #{configType},
+            #{enabledSpcControlled}, #{createdBy}, #{isDefault}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.px.ifp.spc.entity.SpcPointMetadataDO">
+        UPDATE spc_point_metadata
+        <set>
+            <if test="measureCode != null">measure_code = #{measureCode},</if>
+            <if test="measureName != null">measure_name = #{measureCode},</if>
+            <if test="jobId != null">job_id = #{jobId},</if>
+            <if test="indicatorName != null">indicator_name = #{indicatorName},</if>
+            <if test="indicatorLevel != null">indicator_level = #{indicatorLevel},</if>
+            <if test="classCode != null">class_code = #{classCode},</if>
+            <if test="areaCode != null">area_code = #{areaCode},</if>
+            <if test="systemCode != null">system_code = #{systemCode},</if>
+            <if test="pointUnit != null">unit = #{pointUnit},</if>
+            <if test="dataType != null">data_type = #{dataType},</if>
+            <if test="precisionDecimal != null">precision_decimal = #{precisionDecimal},</if>
+            <if test="rangeMin != null">range_min = #{rangeMin},</if>
+            <if test="rangeMax != null">range_max = #{rangeMax},</if>
+            <if test="yAxisMin != null">y_axis_min = #{yAxisMin},</if>
+            <if test="yAxisMax != null">y_axis_max = #{yAxisMax},</if>
+            <if test="yAxisStep != null">y_axis_step = #{yAxisStep},</if>
+            <if test="enableRealtimeAlarm != null">enable_realtime_alarm = #{enableRealtimeAlarm},</if>
+            <if test="enableOfflineChart != null">enable_offline_chart = #{enableOfflineChart},</if>
+            <if test="targetValue != null">target_value = #{targetValue},</if>
+            <if test="uclValue != null">ucl_value = #{uclValue},</if>
+            <if test="lclValue != null">lcl_value = #{lclValue},</if>
+            <if test="uwlValue != null">uwl_value = #{uwlValue},</if>
+            <if test="lwlValue != null">lwl_value = #{lwlValue},</if>
+            <if test="uslValue != null">usl_value = #{uslValue},</if>
+            <if test="lslValue != null">lsl_value = #{lslValue},</if>
+            <if test="lslValue != null">u3l_value = #{u3lValue},</if>
+            <if test="lslValue != null">l3l_value = #{l3lValue},</if>
+            <if test="equipmentId != null">equipment_id = #{equipmentId},</if>
+            <if test="equipmentName != null">equipment_name = #{equipmentName},</if>
+            <if test="ocapTemplateId != null">ocap_template_id = #{ocapTemplateId},</if>
+            <if test="enabledSpcControlled != null">enabled_spc_controlled = #{enabledSpcControlled},</if>
+            <if test="deletedId != null">deleted_id = #{deletedId},</if>
+            <if test="attributes != null">attributes = #{attributes},</if>
+            <if test="createdBy != null">created_by = #{createdBy},</if>
+            <if test="updatedBy != null">updated_by = #{updatedBy},</if>
+            <if test="facCode != null">fac_code = #{facCode},</if>
+            <if test="configType != null">config_type = #{configType},</if>
+            <if test="isDefault != null">is_default = #{isDefault},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id} AND deleted_id = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE spc_point_metadata
+        SET deleted_id = 1, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" resultType="com.px.ifp.spc.entity.SpcPointMetadataDO">
+        SELECT *
+        FROM spc_point_metadata
+        WHERE id = #{id} AND deleted_id = 0
+    </select>
+
+    <select id="selectByJobId" resultType="com.px.ifp.spc.entity.SpcPointMetadataDO">
+        SELECT *
+        FROM spc_point_metadata
+        WHERE job_id = #{jobId} AND deleted_id = 0
+        ORDER BY id
+    </select>
+
+    <!-- 注意：point 列名改为 measure_code -->
+    <select id="selectByPoint" resultType="com.px.ifp.spc.entity.SpcPointMetadataDO">
+        SELECT *
+        FROM spc_point_metadata
+        WHERE measure_code = #{measureCode} and deleted_id = 0
+        ORDER BY id
+    </select>
+
+    <select id="selectByIndicatorName" resultType="com.px.ifp.spc.entity.SpcPointMetadataDO">
+        SELECT *
+        FROM spc_point_metadata
+        WHERE indicator_name = #{indicatorName} AND deleted_id = 0
+        LIMIT 1
+    </select>
+
+</mapper>
