@@ -6,12 +6,13 @@
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} %level [${SYSNAME},%X{X-B3-TraceId:-},%X{X-B3-SpanId:-},%X{msgTraceId},%X{X-Span-Export:-}] [%thread] %class.%method:%line - %msg%n" />
 
     <!--定义日志文件的名称-->
-    <property name="appName" value="ifp-operation" />
+    <property name="appName" value="ifp-spc" />
     <!--定义自己的日志文件的存储地址-->
     <property name="LOG_HOME" value="logs" />
 
-    <conversionRule conversionWord="myMsg" converterClass="com.pxsemic.lves.config.CustomMessageConverter" />
-    <conversionRule conversionWord="ex" converterClass="com.pxsemic.lves.config.ExceptionProxyConverter" />
+    <!-- 注释掉不存在的转换器 -->
+    <!-- <conversionRule conversionWord="myMsg" converterClass="com.pxsemic.lves.config.CustomMessageConverter" /> -->
+    <!-- <conversionRule conversionWord="ex" converterClass="com.pxsemic.lves.config.ExceptionProxyConverter" /> -->
 
     <!--日志输出格式-->
     <property name="logPattern" value="%d %-5level PID=${PID:- } [%-20thread] %-40.40logger{40} [line = %-5line] [method = %-20.20method]: %msg%n"/>
@@ -35,35 +36,9 @@
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
 
-        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <pattern>
-                    <pattern>
-                        {
-                        <!--服务名称-->
-                        "appName": "${appName}",
-                        <!--打印时间-->
-                        "time": "%date{yyyy-MM-dd HH:mm:ss}",
-                        <!--日志级别-->
-                        "level": "%level",
-                        <!--全限定类名-->
-                        "class": "%logger",
-                        <!--类中的哪个方法-->
-                        "method": "%method",
-                        <!--类中的第几行-->
-                        "line": "%line",
-                        <!--日志打印的信息-->
-                        "message": "%replace(%replace(%replace(%myMsg){'(\n)','#'}){'(\r)','#'}){'(\t)','#'}%replace(%replace(%replace(%ex){'(\n)','#'}){'(\r)','#'}){'(\t)','#'}%nopex"
-                        }
-                    </pattern>
-                </pattern>
-            </providers>
-        </encoder>
-        <!--
-        <encoder>
+        <encoder charset="UTF-8">
             <pattern>${logPattern}</pattern>
         </encoder>
-        -->
     </appender>
 
     <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -82,29 +57,8 @@
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
 
-        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <pattern>
-                    <pattern>
-                        {
-                        <!--服务名称-->
-                        "appName": "${appName}",
-                        <!--打印时间-->
-                        "time": "%date{yyyy-MM-dd HH:mm:ss}",
-                        <!--日志级别-->
-                        "level": "%level",
-                        <!--全限定类名-->
-                        "class": "%logger",
-                        <!--类中的哪个方法-->
-                        "method": "%method",
-                        <!--类中的第几行-->
-                        "line": "%line",
-                        <!--日志打印的信息-->
-                        "message": "%replace(%replace(%replace(%myMsg){'(\n)','#'}){'(\r)','#'}){'(\t)','#'}%replace(%replace(%replace(%ex){'(\n)','#'}){'(\r)','#'}){'(\t)','#'}%nopex"
-                        }
-                    </pattern>
-                </pattern>
-            </providers>
+        <encoder charset="UTF-8">
+            <pattern>${logPattern}</pattern>
         </encoder>
     </appender>
 

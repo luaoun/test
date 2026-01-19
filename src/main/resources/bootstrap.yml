@@ -5,6 +5,4 @@ spring:
   application:
     name: px-ifp-spc              	#业务服务名称
   profiles:
-    active: prd
-used:
-  database: zeone
+    active: local
