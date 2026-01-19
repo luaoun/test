@@ -154,7 +154,7 @@ xxl:
       logRetentionDays: -1
       port: 9999
     admin:
-      addresses: http://192.168.41.60:8088/xxl-job-admin
+      addresses: http://localhost:8088/xxl-job-admin
 
 #elasticsearch:
 #  index: index-rs-ifp
