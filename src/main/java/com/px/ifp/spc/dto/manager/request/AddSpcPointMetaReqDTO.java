@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @Author: zhangzhiqiang
@@ -163,5 +164,8 @@ public class AddSpcPointMetaReqDTO extends BaseRequest {
 
     @Schema(description = "更新人账号")
     private String updatedBy;
+
+    @Schema(description = "采样策略配置列表")
+    private List<SamplingStrategyDTO> samplingStrategies;
 
 }

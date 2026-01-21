@@ -180,7 +180,8 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
             throw new BusinessException("指标名称已存在");
         }
 
-        spcSamplingStrategyService.createEmptyStrategy(reqDTO.getMeasureCode());
+        // 批量保存或更新采样策略
+        spcSamplingStrategyService.batchSaveOrUpdate(reqDTO.getMeasureCode(), reqDTO.getSamplingStrategies());
         //更新缓存
         List<SpcPointMetadataDO> spcIndicatorDOList = spcIndicatorMapper.selectByPoint(reqDTO.getFacCode(),spcIndicatorDO.getMeasureCode());
         String facCode = commonService.getThreadLocalFacCode();
@@ -244,6 +245,11 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
 
         //3. 更新spc指标定义缓存，同时 指标JobId和Point不能修改，只能删除在添加，因为缓存ID是用了 JobId+Point组合的key
         SpcPointMetadataDO spcIndicator = spcIndicatorMapper.selectById(reqDTO.getId());
+
+        // 批量保存或更新采样策略
+        if (reqDTO.getSamplingStrategies() != null) {
+            spcSamplingStrategyService.batchSaveOrUpdate(spcIndicator.getMeasureCode(), reqDTO.getSamplingStrategies());
+        }
         //判断空指针，正常情况不会查不到 spcIndicator
         if(Objects.isNull(spcIndicator))
             return true;

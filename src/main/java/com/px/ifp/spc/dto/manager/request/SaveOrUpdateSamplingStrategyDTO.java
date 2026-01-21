@@ -12,6 +12,7 @@ import java.util.Date;
 public class SaveOrUpdateSamplingStrategyDTO extends BaseRequest {
 
     @Schema(description = "ID主键")
+    @NotBlank(message = "ID不能为空")
     private Long id;
 
     @Schema(description = "SPC采样策略总开关")

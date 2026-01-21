@@ -6,13 +6,15 @@ import com.github.pagehelper.Page;
 import com.px.ifp.common.bean.common.BaseResponseData;
 import com.px.ifp.common.bean.common.PageResponse;
 import com.px.ifp.common.utils.ObjectConvertUtil;
+import com.px.ifp.common.web.BaseController;
 import com.px.ifp.spc.dto.publish.request.*;
 import com.px.ifp.spc.dto.publish.response.*;
 import com.px.ifp.spc.dto.manager.request.QuerySpcAnalysisResultNotesDTO;
 import com.px.ifp.spc.entity.SpcPointMetadataDO;
-import com.px.ifp.spc.web.manage.indicator.SpcPointMetaDataController;
+import com.px.ifp.spc.service.indicator.SpcPointMetaDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,10 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Tag(name = "SPC指标相关接口")
+@Tag(name = "SPC指标相关接口(发布)")
 @RestController
 @RequestMapping("/api/v1/publish/spcIndicator")
-public class SpcIndicatorPublishController extends SpcPointMetaDataController {
+public class SpcIndicatorPublishController extends BaseController {
+
+    @Autowired
+    private SpcPointMetaDataService spcPointMetaDataService;
 
     @Operation(summary = "查询SPC指标列表(全厂)")
     @RequestMapping(value = "/queryList", method = RequestMethod.POST)

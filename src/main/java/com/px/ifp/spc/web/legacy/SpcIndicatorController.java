@@ -22,6 +22,7 @@ import com.px.ifp.spc.web.publish.SpcIndicatorPublishController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,6 +46,7 @@ public class SpcIndicatorController extends BaseController {
     private SpcIndicatorPublishController publishController;
 
     @Autowired
+    @Qualifier("spcPointMetaDataController")
     private SpcPointMetaDataController spcIndicatorMgrController;
 
     @Autowired

@@ -96,7 +96,20 @@ spring:
 
 logging:
   level:
-    com.px.ifp.spc: INFO
+    com.px.ifp.spc: DEBUG
+    com.px.ifp.spc.mapper: DEBUG
+    com.baomidou.mybatisplus: DEBUG
+    org.apache.ibatis: DEBUG
+
+# MyBatis Plus 配置
+mybatis-plus:
+  configuration:
+    # 打印SQL日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 显示SQL
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
 
 ribbon:
   ReadTimeout: 2000
