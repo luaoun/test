@@ -515,6 +515,13 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         List<SpcAnalysisDTO> spcAnalysisDTOList = ObjectConvertUtil.convertList(spcIndicatorDOList, SpcAnalysisDTO.class);
         List<String> pointList = new ArrayList<>();
 
+        // 手动映射 enableRealtimeAlarm 到 status
+        for (int i = 0; i < spcAnalysisDTOList.size(); i++) {
+            SpcAnalysisDTO dto = spcAnalysisDTOList.get(i);
+            SpcPointMetadataDO indicatorDO = spcIndicatorDOList.get(i);
+            dto.setStatus(indicatorDO.getEnableRealtimeAlarm());
+        }
+
         if (MapUtil.isNotEmpty(classDictMap)) {
             spcAnalysisDTOList.forEach(dto -> {
                 if (classDictMap.get(dto.getClassCode()) != null) {
@@ -643,6 +650,10 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         List<String> pointList = new ArrayList<>();
         if (!CollectionUtil.isEmpty(spcIndicatorDOList)) {
             spcAnalysisDTOList = ObjectConvertUtil.convertList(spcIndicatorDOList, SpcAnalysisDTO.class);
+            // 手动映射 enableRealtimeAlarm 到 status
+            for (int i = 0; i < spcAnalysisDTOList.size(); i++) {
+                spcAnalysisDTOList.get(i).setStatus(spcIndicatorDOList.get(i).getEnableRealtimeAlarm());
+            }
             spcAnalysisDTOList.stream().forEach(e -> pointList.add(e.getPoint()));
         }
 
@@ -1301,6 +1312,8 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
                 SpcAnalysisDTO spcAnalysisDTO = spcAnalysisDTOList.get(i);
                 SpcPointMetadataDO spcIndicatorDO = list.get(i);
                 spcAnalysisDTO.setIndicatorId(spcIndicatorDO.getId());
+                // 手动映射 enableRealtimeAlarm 到 status
+                spcAnalysisDTO.setStatus(spcIndicatorDO.getEnableRealtimeAlarm());
             }
         return spcAnalysisDTOList;
     }
