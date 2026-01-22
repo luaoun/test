@@ -155,6 +155,9 @@ public class UpdateSpcPointMetaReqDTO extends BaseRequest {
     @Schema(description = "逻辑删除标识")
     private Boolean deleted = false;
 
+    @Schema(description = "标签（多个标签用逗号分隔）")
+    private String tags;
+
     @Schema(description = "扩展属性（自定义字段）")
     private String attributes;
 

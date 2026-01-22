@@ -164,6 +164,7 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         if(StringUtils.isNotEmpty(reqDTO.getOcap())) ocapTemplateId = reqDTO.getOcap();
         spcIndicatorDO.setOcapTemplateId(ocapTemplateId);
         spcIndicatorDO.setEnabledSpcControlled(reqDTO.getEnabledSpcControlled());
+        spcIndicatorDO.setTags(reqDTO.getTags());
         spcIndicatorDO.setAttributes(reqDTO.getAttributes());
         CurrentAccountDTO currentAccount = RequestHeaderUtil.getCurrentAccount();
         String createBy = StringUtils.isEmpty(currentAccount.getAccountId()) ? "system" : currentAccount.getAccountId();
@@ -227,6 +228,7 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         if(StringUtils.isNotEmpty(reqDTO.getOcap())) ocapTemplateId = reqDTO.getOcap();
         spcIndicatorDO.setOcapTemplateId(ocapTemplateId);
         spcIndicatorDO.setEnabledSpcControlled(reqDTO.getEnabledSpcControlled());
+        spcIndicatorDO.setTags(reqDTO.getTags());
         spcIndicatorDO.setAttributes(reqDTO.getAttributes());
         CurrentAccountDTO currentAccount = RequestHeaderUtil.getCurrentAccount();
         String updateBy = StringUtils.isEmpty(currentAccount.getAccountId()) ? "system" : currentAccount.getAccountId();

@@ -101,7 +101,7 @@
             data_type, precision_decimal, range_min, range_max, y_axis_min, y_axis_max,y_axis_step,
             enable_realtime_alarm, enable_offline_chart,
             target_value, ucl_value, lcl_value, uwl_value, lwl_value, usl_value, lsl_value,u3l_value,l3l_value,
-            equipment_id, equipment_name, ocap_template_id, attributes, updated_by, config_type,
+            equipment_id, equipment_name, ocap_template_id, tags, attributes, updated_by, config_type,
             enabled_spc_controlled, created_by, is_default
         ) VALUES (
             #{jobId}, #{indicatorName}, #{classCode}, #{systemCode}, #{indicatorLevel},
@@ -109,7 +109,7 @@
             #{dataType}, #{precisionDecimal}, #{rangeMin}, #{rangeMax}, #{yAxisMin}, #{yAxisMax},#{yAxisStep},
             #{enableRealtimeAlarm}, #{enableOfflineChart},
             #{targetValue}, #{uclValue}, #{lclValue}, #{uwlValue}, #{lwlValue}, #{uslValue}, #{lslValue}, #{u3lValue}, #{l3lValue},
-            #{equipmentId}, #{equipmentName}, #{ocapTemplateId}, #{attributes}, #{updatedBy}, #{configType},
+            #{equipmentId}, #{equipmentName}, #{ocapTemplateId}, #{tags}, #{attributes}, #{updatedBy}, #{configType},
             #{enabledSpcControlled}, #{createdBy}, #{isDefault}
         )
     </insert>
@@ -149,6 +149,7 @@
             <if test="ocapTemplateId != null">ocap_template_id = #{ocapTemplateId},</if>
             <if test="enabledSpcControlled != null">enabled_spc_controlled = #{enabledSpcControlled},</if>
             <if test="deletedId != null">deleted_id = #{deletedId},</if>
+            <if test="tags != null">tags = #{tags},</if>
             <if test="attributes != null">attributes = #{attributes},</if>
             <if test="createdBy != null">created_by = #{createdBy},</if>
             <if test="updatedBy != null">updated_by = #{updatedBy},</if>

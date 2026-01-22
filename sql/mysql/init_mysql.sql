@@ -36,6 +36,7 @@ CREATE TABLE `spc_point_metadata` (
   `enabled_sampling_status` tinyint(1) DEFAULT '0' COMMENT 'SPC采样策略总开关',
   `enabled_spc_controlled` tinyint(1) DEFAULT '0' COMMENT 'SPC监控总开关',
   `deleted_id` bigint(20) DEFAULT '0' COMMENT '逻辑删除标识',
+  `tags` varchar(500) DEFAULT NULL COMMENT '标签（多个标签用逗号分隔）',
   `attributes` json DEFAULT NULL COMMENT '扩展属性（自定义字段）',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

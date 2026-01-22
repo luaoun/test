@@ -161,6 +161,9 @@ public class SpcPointMetadataDO {
     @TableField("deleted_id")
     private Long deletedId;
 
+    @TableField("tags")
+    private String tags;              // 标签（多个标签用逗号分隔）
+
     // ============================================================
     // 扩展属性（新增字段）
     // ============================================================
