@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
+@Tag(name = "SPC控制图曲线数据相关接口(V2)")
 @RestController
 @RequestMapping("api/v2/curve")
 @Tag(name = "SPC曲线数据", description = "SPC曲线数据与报警标记API")

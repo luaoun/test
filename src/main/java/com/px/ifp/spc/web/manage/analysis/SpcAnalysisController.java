@@ -29,7 +29,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Tag(name = "SPC分析相关接口")
+@Tag(name = "SPC数据分析相关接口(V2)")
 @RestController
 @RequestMapping("/api/v2/analysis")
 public class SpcAnalysisController extends BaseController {

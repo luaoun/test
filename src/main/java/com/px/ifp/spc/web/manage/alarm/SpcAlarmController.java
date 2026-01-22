@@ -3,6 +3,7 @@ package com.px.ifp.spc.web.manage.alarm;
 import com.px.ifp.spc.entity.SpcAlarmEvent;
 import com.px.ifp.spc.entity.SpcAnalysisResult;
 import com.px.ifp.spc.service.alarm.SpcAlarmEventService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,6 +17,7 @@ import java.util.List;
  * SPC报警控制器
  */
 @Slf4j
+@Tag(name = "SPC告警相关接口(V2)")
 @RestController
 @RequestMapping("/api/v2/alarm")
 public class SpcAlarmController {

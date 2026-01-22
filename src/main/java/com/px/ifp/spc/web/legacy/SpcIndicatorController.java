@@ -37,7 +37,7 @@ import java.util.Map;
  * @Author: zhangzhiqiang
  * @Date: 2024-05-08
  */
-@Tag(name = "SPC指标相关接口")
+@Tag(name = "SPC指标相关接口(V1-Legacy)")
 @RestController
 @RequestMapping("/api/v1/spcIndicator")
 public class SpcIndicatorController extends BaseController {
