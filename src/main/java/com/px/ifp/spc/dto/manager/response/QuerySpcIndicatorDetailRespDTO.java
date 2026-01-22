@@ -1,12 +1,14 @@
 package com.px.ifp.spc.dto.manager.response;
 
 import com.px.ifp.common.bean.common.BaseBean;
+import com.px.ifp.spc.dto.manager.request.SamplingStrategyDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Author: zhangzhiqiang
@@ -160,6 +162,9 @@ public class QuerySpcIndicatorDetailRespDTO extends BaseBean {
     @Schema(description = "逻辑删除标识")
     private Boolean deleted = false;
 
+    @Schema(description = "标签列表")
+    private List<String> tags;
+
     @Schema(description = "扩展属性（自定义字段）")
     private String attributes;
 
@@ -168,4 +173,7 @@ public class QuerySpcIndicatorDetailRespDTO extends BaseBean {
 
     @Schema(description = "更新人账号")
     private String updatedBy;
+
+    @Schema(description = "采样策略配置列表")
+    private List<SamplingStrategyDTO> samplingStrategies;
 }

@@ -164,7 +164,12 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         if(StringUtils.isNotEmpty(reqDTO.getOcap())) ocapTemplateId = reqDTO.getOcap();
         spcIndicatorDO.setOcapTemplateId(ocapTemplateId);
         spcIndicatorDO.setEnabledSpcControlled(reqDTO.getEnabledSpcControlled());
-        spcIndicatorDO.setTags(reqDTO.getTags());
+        // 将标签列表转换为逗号分隔的字符串
+        if (reqDTO.getTags() != null && !reqDTO.getTags().isEmpty()) {
+            spcIndicatorDO.setTags(String.join(",", reqDTO.getTags()));
+        } else {
+            spcIndicatorDO.setTags(null);
+        }
         spcIndicatorDO.setAttributes(reqDTO.getAttributes());
         CurrentAccountDTO currentAccount = RequestHeaderUtil.getCurrentAccount();
         String createBy = StringUtils.isEmpty(currentAccount.getAccountId()) ? "system" : currentAccount.getAccountId();
@@ -228,7 +233,12 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         if(StringUtils.isNotEmpty(reqDTO.getOcap())) ocapTemplateId = reqDTO.getOcap();
         spcIndicatorDO.setOcapTemplateId(ocapTemplateId);
         spcIndicatorDO.setEnabledSpcControlled(reqDTO.getEnabledSpcControlled());
-        spcIndicatorDO.setTags(reqDTO.getTags());
+        // 将标签列表转换为逗号分隔的字符串
+        if (reqDTO.getTags() != null && !reqDTO.getTags().isEmpty()) {
+            spcIndicatorDO.setTags(String.join(",", reqDTO.getTags()));
+        } else {
+            spcIndicatorDO.setTags(null);
+        }
         spcIndicatorDO.setAttributes(reqDTO.getAttributes());
         CurrentAccountDTO currentAccount = RequestHeaderUtil.getCurrentAccount();
         String updateBy = StringUtils.isEmpty(currentAccount.getAccountId()) ? "system" : currentAccount.getAccountId();
@@ -375,6 +385,22 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         respDTO.setEndValue(respDTO.getYAxisMax());
         respDTO.setStep(respDTO.getYAxisStep());
 
+        // 将 tags 字符串转换为 List<String>
+        if (StrUtil.isNotBlank(spcIndicatorDO.getTags())) {
+            respDTO.setTags(Arrays.asList(spcIndicatorDO.getTags().split(",")));
+        }
+
+        // 查询采样策略配置
+        LambdaQueryWrapper<com.px.ifp.spc.entity.SpcSamplingStrategy> strategyWrapper = new LambdaQueryWrapper<>();
+        strategyWrapper.eq(com.px.ifp.spc.entity.SpcSamplingStrategy::getMeasureCode, spcIndicatorDO.getMeasureCode());
+        List<com.px.ifp.spc.entity.SpcSamplingStrategy> strategies = spcSamplingStrategyService.list(strategyWrapper);
+        if (CollectionUtil.isNotEmpty(strategies)) {
+            List<SamplingStrategyDTO> samplingStrategies = strategies.stream()
+                    .map(strategy -> ObjectConvertUtil.convert(strategy, SamplingStrategyDTO.class))
+                    .collect(Collectors.toList());
+            respDTO.setSamplingStrategies(samplingStrategies);
+        }
+
         return respDTO;
     }
 
@@ -405,7 +431,24 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         List<SpcPointMetadataDO> list = this.list(queryWrapper);
         if (CollectionUtil.isEmpty(list))
             return null;
-        QuerySpcIndicatorDetailRespDTO respDTO = ObjectConvertUtil.convert(list.get(0), QuerySpcIndicatorDetailRespDTO.class);
+        SpcPointMetadataDO spcIndicatorDO = list.get(0);
+        QuerySpcIndicatorDetailRespDTO respDTO = ObjectConvertUtil.convert(spcIndicatorDO, QuerySpcIndicatorDetailRespDTO.class);
+
+        // 将 tags 字符串转换为 List<String>
+        if (StrUtil.isNotBlank(spcIndicatorDO.getTags())) {
+            respDTO.setTags(Arrays.asList(spcIndicatorDO.getTags().split(",")));
+        }
+
+        // 查询采样策略配置
+        LambdaQueryWrapper<com.px.ifp.spc.entity.SpcSamplingStrategy> strategyWrapper = new LambdaQueryWrapper<>();
+        strategyWrapper.eq(com.px.ifp.spc.entity.SpcSamplingStrategy::getMeasureCode, spcIndicatorDO.getMeasureCode());
+        List<com.px.ifp.spc.entity.SpcSamplingStrategy> strategies = spcSamplingStrategyService.list(strategyWrapper);
+        if (CollectionUtil.isNotEmpty(strategies)) {
+            List<SamplingStrategyDTO> samplingStrategies = strategies.stream()
+                    .map(strategy -> ObjectConvertUtil.convert(strategy, SamplingStrategyDTO.class))
+                    .collect(Collectors.toList());
+            respDTO.setSamplingStrategies(samplingStrategies);
+        }
 
         return respDTO;
     }
