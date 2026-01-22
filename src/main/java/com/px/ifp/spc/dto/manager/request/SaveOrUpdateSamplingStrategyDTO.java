@@ -7,6 +7,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class SaveOrUpdateSamplingStrategyDTO extends BaseRequest {
@@ -66,8 +67,8 @@ public class SaveOrUpdateSamplingStrategyDTO extends BaseRequest {
     @Schema(description = "告警模式持续时间")
     private Integer alertDurationS;
 
-    @Schema(description = "统计特征（逗号分隔）")
-    private String features;
+    @Schema(description = "统计特征列表")
+    private List<String> features;
 
     @Schema(description = "计算方式：realtime/batch/hybrid")
     private String computationMode;

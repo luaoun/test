@@ -357,25 +357,7 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
             return new QuerySpcIndicatorDetailRespDTO();
         }
         QuerySpcIndicatorDetailRespDTO respDTO = ObjectConvertUtil.convert(spcIndicatorDO, QuerySpcIndicatorDetailRespDTO.class);
-        Map<String, Object> classDictMap = dictService.getLocalCache("className");
-        if (MapUtil.isNotEmpty(classDictMap) && classDictMap.get(spcIndicatorDO.getClassCode()) != null) {
-            respDTO.setClassName(JSONUtil.parseObj(classDictMap.get(spcIndicatorDO.getClassCode())).get("itemName").toString());
-        }
 
-        //查询出systemName
-        QuerySystemCategoryByCodesDTO querySysCodeDTO = new QuerySystemCategoryByCodesDTO();
-        querySysCodeDTO.setCodeList(Arrays.asList(respDTO.getSystemCode()));
-        BaseResponseData<List<SystemCategoryDTO>> response = digitaltwinsFeign.queryByCodeList(querySysCodeDTO);
-        //没有查到子系统信息 则不处理子系统名称了，直接返回
-        if(CollectionUtil.isEmpty(response.getData()))
-            return respDTO;
-
-        List<SystemCategoryDTO> systemCategoryDTOList = response.getData();
-
-        if (systemCategoryDTOList != null && systemCategoryDTOList.size() > 0) {
-            SystemCategoryDTO systemCategory = systemCategoryDTOList.get(0);
-            respDTO.setSystemName(systemCategory.getName());
-        }
 
         //补充新增加的字段
         respDTO.setPoint(respDTO.getMeasureCode());
@@ -396,9 +378,36 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         List<com.px.ifp.spc.entity.SpcSamplingStrategy> strategies = spcSamplingStrategyService.list(strategyWrapper);
         if (CollectionUtil.isNotEmpty(strategies)) {
             List<SamplingStrategyDTO> samplingStrategies = strategies.stream()
-                    .map(strategy -> ObjectConvertUtil.convert(strategy, SamplingStrategyDTO.class))
+                    .map(strategy -> {
+                        SamplingStrategyDTO dto = ObjectConvertUtil.convert(strategy, SamplingStrategyDTO.class);
+                        // 将 features 字符串转换为 List<String>
+                        if (StrUtil.isNotBlank(strategy.getFeatures())) {
+                            dto.setFeatures(Arrays.asList(strategy.getFeatures().split(",")));
+                        }
+                        return dto;
+                    })
                     .collect(Collectors.toList());
             respDTO.setSamplingStrategies(samplingStrategies);
+        }
+
+        Map<String, Object> classDictMap = dictService.getLocalCache("className");
+        if (MapUtil.isNotEmpty(classDictMap) && classDictMap.get(spcIndicatorDO.getClassCode()) != null) {
+            respDTO.setClassName(JSONUtil.parseObj(classDictMap.get(spcIndicatorDO.getClassCode())).get("itemName").toString());
+        }
+
+        //查询出systemName
+        QuerySystemCategoryByCodesDTO querySysCodeDTO = new QuerySystemCategoryByCodesDTO();
+        querySysCodeDTO.setCodeList(Arrays.asList(respDTO.getSystemCode()));
+        BaseResponseData<List<SystemCategoryDTO>> response = digitaltwinsFeign.queryByCodeList(querySysCodeDTO);
+        //没有查到子系统信息 则不处理子系统名称了，直接返回
+        if(CollectionUtil.isEmpty(response.getData()))
+            return respDTO;
+
+        List<SystemCategoryDTO> systemCategoryDTOList = response.getData();
+
+        if (systemCategoryDTOList != null && systemCategoryDTOList.size() > 0) {
+            SystemCategoryDTO systemCategory = systemCategoryDTOList.get(0);
+            respDTO.setSystemName(systemCategory.getName());
         }
 
         return respDTO;
@@ -445,7 +454,14 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         List<com.px.ifp.spc.entity.SpcSamplingStrategy> strategies = spcSamplingStrategyService.list(strategyWrapper);
         if (CollectionUtil.isNotEmpty(strategies)) {
             List<SamplingStrategyDTO> samplingStrategies = strategies.stream()
-                    .map(strategy -> ObjectConvertUtil.convert(strategy, SamplingStrategyDTO.class))
+                    .map(strategy -> {
+                        SamplingStrategyDTO dto = ObjectConvertUtil.convert(strategy, SamplingStrategyDTO.class);
+                        // 将 features 字符串转换为 List<String>
+                        if (StrUtil.isNotBlank(strategy.getFeatures())) {
+                            dto.setFeatures(Arrays.asList(strategy.getFeatures().split(",")));
+                        }
+                        return dto;
+                    })
                     .collect(Collectors.toList());
             respDTO.setSamplingStrategies(samplingStrategies);
         }
