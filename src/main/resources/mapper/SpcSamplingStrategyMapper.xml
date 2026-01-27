@@ -6,6 +6,7 @@
     <resultMap id="BaseResultMap" type="com.px.ifp.spc.entity.SpcSamplingStrategy">
         <id column="id" property="id" />
         <result column="measure_code" property="measureCode" />
+        <result column="job_id" property="jobId" />
         <result column="period_s" property="periodS" />
         <result column="period_label" property="periodLabel" />
         <result column="strategy_type" property="strategyType" />
@@ -55,19 +56,19 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, measure_code, period_s, period_label, strategy_type, window_type, window_size_s, slide_step_s, session_gap_s, deadband_abs, deadband_percent, max_interval_s, threshold_upper, threshold_lower, normal_period_s, alert_period_s, alert_duration_s, features, computation_mode, value_mode, subgroup_window_s, min_valid_n, valid_ratio_min, drift_ratio_max, baseline_window_days, baseline_refresh_s, enabled, priority, created_at, updated_at, fac_code, physical_limit_enabled, physical_min_value, physical_max_value, out_of_range_action, outlier_detection_method, outlier_3sigma_threshold, outlier_3sigma_iterations, outlier_median_threshold, outlier_median_window, outlier_iqr_k, outlier_hampel_k, outlier_hampel_window, outlier_action, quality_filter_enabled, quality_allowed_codes, bad_value_action
+        id, measure_code, job_id, period_s, period_label, strategy_type, window_type, window_size_s, slide_step_s, session_gap_s, deadband_abs, deadband_percent, max_interval_s, threshold_upper, threshold_lower, normal_period_s, alert_period_s, alert_duration_s, features, computation_mode, value_mode, subgroup_window_s, min_valid_n, valid_ratio_min, drift_ratio_max, baseline_window_days, baseline_refresh_s, enabled, priority, created_at, updated_at, fac_code, physical_limit_enabled, physical_min_value, physical_max_value, out_of_range_action, outlier_detection_method, outlier_3sigma_threshold, outlier_3sigma_iterations, outlier_median_threshold, outlier_median_window, outlier_iqr_k, outlier_hampel_k, outlier_hampel_window, outlier_action, quality_filter_enabled, quality_allowed_codes, bad_value_action
     </sql>
 
     <insert id="insert" parameterType="com.px.ifp.spc.entity.SpcSamplingStrategy" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO spc_sampling_strategy (
-            measure_code,period_s,period_label,strategy_type,window_type,window_size_s,session_gap_s,
+            measure_code,job_id,period_s,period_label,strategy_type,window_type,window_size_s,session_gap_s,
             deadband_abs,deadband_percent,max_interval_s,threshold_upper,threshold_lower,normal_period_s,alert_period_s,alert_duration_s,
             features,computation_mode,enabled,priority,physical_limit_enabled,physical_min_value,physical_max_value,
             out_of_range_action,outlier_detection_method,outlier_3sigma_threshold,outlier_3sigma_iterations,outlier_median_threshold,
             outlier_median_window,outlier_iqr_k,outlier_hampel_k,outlier_hampel_window,outlier_action,
             quality_filter_enabled,quality_allowed_codes,bad_value_action,fac_code
         ) VALUES (
-            #{measureCode},#{periodS},#{periodLabel},#{strategyType},#{windowType},#{windowSizeS},#{sessionGapS},
+            #{measureCode},#{jobId},#{periodS},#{periodLabel},#{strategyType},#{windowType},#{windowSizeS},#{sessionGapS},
             #{deadbandAbs},#{deadbandPercent},#{maxIntervalS},#{thresholdUpper},#{thresholdLower},#{normalPeriodS},#{alertPeriodS},#{alertDurationS},
             #{features},#{computationMode},#{enabled},#{priority},#{physicalLimitEnabled},#{physicalMinValue},#{physicalMaxValue},
             #{outOfRangeAction},#{outlierDetectionMethod},#{outlier3sigmaThreshold},#{outlier3sigmaIterations},#{outlierMedianThreshold},
@@ -81,6 +82,7 @@
         UPDATE spc_sampling_strategy
         <set>
              <if test="measureCode != null">measure_code = #{measureCode},</if>
+             <if test="jobId != null">job_id = #{jobId},</if>
              <if test="periodS != null">period_s = #{periodS},</if>
              <if test="periodLabel != null">period_label = #{periodLabel},</if>
              <if test="strategyType != null">strategy_type = #{strategyType},</if>
@@ -134,5 +136,21 @@
         FROM spc_sampling_strategy
         WHERE measure_code = #{measureCode} AND period_s = #{periodS} limit 1
     </select>
+
+    <select id="selectByJobIdAndPeriodS" resultType="com.px.ifp.spc.entity.SpcSamplingStrategy">
+        SELECT *
+        FROM spc_sampling_strategy
+        WHERE job_id = #{jobId} AND period_s = #{periodS} limit 1
+    </select>
+
+    <select id="selectByJobId" resultType="com.px.ifp.spc.entity.SpcSamplingStrategy">
+        SELECT *
+        FROM spc_sampling_strategy
+        WHERE job_id = #{jobId}
+    </select>
+
+    <delete id="deleteByJobId">
+        DELETE FROM spc_sampling_strategy WHERE job_id = #{jobId}
+    </delete>
 
 </mapper>

@@ -36,6 +36,10 @@ public class SpcSamplingStrategy implements Serializable {
     @TableField("measure_code")
     private String measureCode;
 
+    @Schema(description = "作业ID，关联spc_point_metadata表的job_id")
+    @TableField("job_id")
+    private String jobId;
+
     @Schema(description = "采样周期（秒）：60/300/3600")
     @TableField("period_s")
     private Integer periodS;

@@ -125,4 +125,83 @@ public class SpcSamplingStrategyServiceImpl extends ServiceImpl<SpcSamplingStrat
             }
         }
     }
+
+    @Override
+    @Transactional
+    public void batchSaveOrUpdateByJobId(String measureCode, String jobId, List<SamplingStrategyDTO> samplingStrategies) {
+        if (CollectionUtil.isEmpty(samplingStrategies)) {
+            // 如果没有传入采样策略，创建一个默认的空策略
+            createEmptyStrategyByJobId(measureCode, jobId);
+            return;
+        }
+
+        for (SamplingStrategyDTO strategyDTO : samplingStrategies) {
+            // 转换为实体对象
+            SpcSamplingStrategy entity = ObjectConvertUtil.convert(strategyDTO, SpcSamplingStrategy.class);
+            // 设置指标编码和作业ID
+            entity.setMeasureCode(measureCode);
+            entity.setJobId(jobId);
+
+            // 将 features List<String> 转换为逗号分隔的字符串
+            if (strategyDTO.getFeatures() != null && !strategyDTO.getFeatures().isEmpty()) {
+                entity.setFeatures(String.join(",", strategyDTO.getFeatures()));
+            } else {
+                entity.setFeatures(null);
+            }
+
+            if (strategyDTO.getId() != null) {
+                // 如果有ID，执行更新
+                spcSamplingStrategyMapper.updateById(entity);
+                log.info("更新采样策略成功: jobId={}, measureCode={}, periodS={}, id={}",
+                        jobId, measureCode, entity.getPeriodS(), entity.getId());
+            } else {
+                // 如果没有ID，检查是否已存在相同jobId和周期的策略
+                if (strategyDTO.getPeriodS() != null) {
+                    SpcSamplingStrategy existing = spcSamplingStrategyMapper.selectByJobIdAndPeriodS(
+                            jobId, strategyDTO.getPeriodS());
+
+                    if (existing != null) {
+                        // 已存在，执行更新
+                        entity.setId(existing.getId());
+                        spcSamplingStrategyMapper.updateById(entity);
+                        log.info("更新已存在的采样策略: jobId={}, measureCode={}, periodS={}, id={}",
+                                jobId, measureCode, entity.getPeriodS(), existing.getId());
+                    } else {
+                        // 不存在，执行插入
+                        spcSamplingStrategyMapper.insert(entity);
+                        log.info("新增采样策略成功: jobId={}, measureCode={}, periodS={}",
+                                jobId, measureCode, entity.getPeriodS());
+                    }
+                } else {
+                    // 没有指定周期，直接插入
+                    spcSamplingStrategyMapper.insert(entity);
+                    log.info("新增采样策略成功: jobId={}, measureCode={}", jobId, measureCode);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void createEmptyStrategyByJobId(String measureCode, String jobId) {
+        SpcSamplingStrategy entity = new SpcSamplingStrategy();
+        entity.setMeasureCode(measureCode);
+        entity.setJobId(jobId);
+        entity.setPeriodS(60);
+        entity.setEnabled(false);
+        entity.setPeriodLabel("1m");
+        entity.setStrategyType("periodic");
+        entity.setWindowType("tumble");
+        entity.setWindowSizeS(60);
+        spcSamplingStrategyMapper.insert(entity);
+    }
+
+    @Override
+    public List<SpcSamplingStrategy> selectByJobId(String jobId) {
+        return spcSamplingStrategyMapper.selectByJobId(jobId);
+    }
+
+    @Override
+    public void deleteByJobId(String jobId) {
+        spcSamplingStrategyMapper.deleteByJobId(jobId);
+    }
 }

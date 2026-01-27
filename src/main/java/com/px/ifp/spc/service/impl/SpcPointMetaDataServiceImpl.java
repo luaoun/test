@@ -186,8 +186,11 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
             throw new BusinessException("指标名称已存在");
         }
 
-        // 批量保存或更新采样策略
-        spcSamplingStrategyService.batchSaveOrUpdate(reqDTO.getMeasureCode(), reqDTO.getSamplingStrategies());
+        // 处理采样策略：根据 periodLabel 自动填充 periodS 和 windowSizeS
+        processSamplingStrategiesPeriodLabel(reqDTO.getSamplingStrategies());
+
+        // 批量保存或更新采样策略（通过jobId关联，支持多个相同measureCode的点位配置）
+        spcSamplingStrategyService.batchSaveOrUpdateByJobId(spcIndicatorDO.getMeasureCode(), spcIndicatorDO.getJobId(), reqDTO.getSamplingStrategies());
         //更新缓存
         List<SpcPointMetadataDO> spcIndicatorDOList = spcIndicatorMapper.selectByPoint(reqDTO.getFacCode(),spcIndicatorDO.getMeasureCode());
         String facCode = commonService.getThreadLocalFacCode();
@@ -258,9 +261,12 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         //3. 更新spc指标定义缓存，同时 指标JobId和Point不能修改，只能删除在添加，因为缓存ID是用了 JobId+Point组合的key
         SpcPointMetadataDO spcIndicator = spcIndicatorMapper.selectById(reqDTO.getId());
 
-        // 批量保存或更新采样策略
+        // 处理采样策略：根据 periodLabel 自动填充 periodS 和 windowSizeS
+        processSamplingStrategiesPeriodLabel(reqDTO.getSamplingStrategies());
+
+        // 批量保存或更新采样策略（通过jobId关联，支持多个相同measureCode的点位配置）
         if (reqDTO.getSamplingStrategies() != null) {
-            spcSamplingStrategyService.batchSaveOrUpdate(spcIndicator.getMeasureCode(), reqDTO.getSamplingStrategies());
+            spcSamplingStrategyService.batchSaveOrUpdateByJobId(spcIndicator.getMeasureCode(), spcIndicator.getJobId(), reqDTO.getSamplingStrategies());
         }
         //判断空指针，正常情况不会查不到 spcIndicator
         if(Objects.isNull(spcIndicator))
@@ -372,10 +378,14 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
             respDTO.setTags(Arrays.asList(spcIndicatorDO.getTags().split(",")));
         }
 
-        // 查询采样策略配置
-        LambdaQueryWrapper<com.px.ifp.spc.entity.SpcSamplingStrategy> strategyWrapper = new LambdaQueryWrapper<>();
-        strategyWrapper.eq(com.px.ifp.spc.entity.SpcSamplingStrategy::getMeasureCode, spcIndicatorDO.getMeasureCode());
-        List<com.px.ifp.spc.entity.SpcSamplingStrategy> strategies = spcSamplingStrategyService.list(strategyWrapper);
+        // 查询采样策略配置（通过jobId关联，支持多个相同measureCode的点位配置）
+        List<com.px.ifp.spc.entity.SpcSamplingStrategy> strategies = spcSamplingStrategyService.selectByJobId(spcIndicatorDO.getJobId());
+        // 如果通过jobId未查到（兼容旧数据），尝试通过measureCode查询
+        if (CollectionUtil.isEmpty(strategies)) {
+            LambdaQueryWrapper<com.px.ifp.spc.entity.SpcSamplingStrategy> strategyWrapper = new LambdaQueryWrapper<>();
+            strategyWrapper.eq(com.px.ifp.spc.entity.SpcSamplingStrategy::getMeasureCode, spcIndicatorDO.getMeasureCode());
+            strategies = spcSamplingStrategyService.list(strategyWrapper);
+        }
         if (CollectionUtil.isNotEmpty(strategies)) {
             List<SamplingStrategyDTO> samplingStrategies = strategies.stream()
                     .map(strategy -> {
@@ -448,10 +458,14 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
             respDTO.setTags(Arrays.asList(spcIndicatorDO.getTags().split(",")));
         }
 
-        // 查询采样策略配置
-        LambdaQueryWrapper<com.px.ifp.spc.entity.SpcSamplingStrategy> strategyWrapper = new LambdaQueryWrapper<>();
-        strategyWrapper.eq(com.px.ifp.spc.entity.SpcSamplingStrategy::getMeasureCode, spcIndicatorDO.getMeasureCode());
-        List<com.px.ifp.spc.entity.SpcSamplingStrategy> strategies = spcSamplingStrategyService.list(strategyWrapper);
+        // 查询采样策略配置（通过jobId关联，支持多个相同measureCode的点位配置）
+        List<com.px.ifp.spc.entity.SpcSamplingStrategy> strategies = spcSamplingStrategyService.selectByJobId(spcIndicatorDO.getJobId());
+        // 如果通过jobId未查到（兼容旧数据），尝试通过measureCode查询
+        if (CollectionUtil.isEmpty(strategies)) {
+            LambdaQueryWrapper<com.px.ifp.spc.entity.SpcSamplingStrategy> strategyWrapper = new LambdaQueryWrapper<>();
+            strategyWrapper.eq(com.px.ifp.spc.entity.SpcSamplingStrategy::getMeasureCode, spcIndicatorDO.getMeasureCode());
+            strategies = spcSamplingStrategyService.list(strategyWrapper);
+        }
         if (CollectionUtil.isNotEmpty(strategies)) {
             List<SamplingStrategyDTO> samplingStrategies = strategies.stream()
                     .map(strategy -> {
@@ -1984,6 +1998,84 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
             return "spc:indicator:" + point;
         }
         return facCode + ":spc:indicator:" + point;
+    }
+
+    /**
+     * 处理采样策略配置：根据 periodLabel 自动计算并填充 periodS 和 windowSizeS
+     *
+     * @param samplingStrategies 采样策略列表
+     */
+    private void processSamplingStrategiesPeriodLabel(List<SamplingStrategyDTO> samplingStrategies) {
+        if (samplingStrategies == null || samplingStrategies.isEmpty()) {
+            return;
+        }
+
+        for (SamplingStrategyDTO strategy : samplingStrategies) {
+            // 只处理 periodic 类型的策略
+            if (!"periodic".equalsIgnoreCase(strategy.getStrategyType())) {
+                continue;
+            }
+
+            String periodLabel = strategy.getPeriodLabel();
+            if (periodLabel == null || periodLabel.trim().isEmpty()) {
+                continue;
+            }
+
+            // 根据 periodLabel 计算秒数
+            Integer periodSeconds = parsePeriodLabelToSeconds(periodLabel);
+            if (periodSeconds != null) {
+                // 设置 periodS
+                strategy.setPeriodS(periodSeconds);
+
+                // 对于 periodic 策略，windowSizeS 默认等于 periodS
+                strategy.setWindowSizeS(periodSeconds);
+
+                log.info("自动填充采样策略参数: periodLabel={}, periodS={}, windowSizeS={}",
+                        periodLabel, periodSeconds, periodSeconds);
+            }
+        }
+    }
+
+    /**
+     * 将 periodLabel 解析为秒数
+     * 支持的格式：1m, 5m, 1h 等
+     *
+     * @param periodLabel 周期标签（如 "1m", "5m", "1h"）
+     * @return 对应的秒数，如果格式不支持则返回 null
+     */
+    private Integer parsePeriodLabelToSeconds(String periodLabel) {
+        if (periodLabel == null || periodLabel.trim().isEmpty()) {
+            return null;
+        }
+
+        periodLabel = periodLabel.trim().toLowerCase();
+
+        // 解析数字和单位
+        try {
+            // 匹配格式：数字 + 单位（如 "1m", "5m", "1h"）
+            if (periodLabel.matches("^\\d+[mh]$")) {
+                String numPart = periodLabel.substring(0, periodLabel.length() - 1);
+                String unitPart = periodLabel.substring(periodLabel.length() - 1);
+
+                int value = Integer.parseInt(numPart);
+
+                switch (unitPart) {
+                    case "m":  // 分钟
+                        return value * 60;
+                    case "h":  // 小时
+                        return value * 3600;
+                    default:
+                        log.warn("不支持的 periodLabel 单位: {}", periodLabel);
+                        return null;
+                }
+            } else {
+                log.warn("不支持的 periodLabel 格式: {}，应为类似 '1m', '5m', '1h' 的格式", periodLabel);
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("解析 periodLabel 失败: {}", periodLabel, e);
+            return null;
+        }
     }
 
     public static void main(String[] args) {

@@ -23,4 +23,10 @@ public interface SpcSamplingStrategyMapper extends BaseMapper<SpcSamplingStrateg
     int updateById(SpcSamplingStrategy samplingStrategy);
 
     SpcSamplingStrategy selectByMeasureCodeAndPeriodS(@Param("measureCode") String measureCode, @Param("periodS") Integer periodS);
+
+    SpcSamplingStrategy selectByJobIdAndPeriodS(@Param("jobId") String jobId, @Param("periodS") Integer periodS);
+
+    List<SpcSamplingStrategy> selectByJobId(@Param("jobId") String jobId);
+
+    void deleteByJobId(@Param("jobId") String jobId);
 }
