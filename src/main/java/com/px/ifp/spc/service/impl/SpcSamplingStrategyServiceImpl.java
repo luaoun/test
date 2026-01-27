@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -135,6 +137,9 @@ public class SpcSamplingStrategyServiceImpl extends ServiceImpl<SpcSamplingStrat
             return;
         }
 
+        // 检查传入的采样策略列表中是否有重复的 periodS（唯一约束检查）
+        checkDuplicatePeriodS(samplingStrategies, jobId);
+
         for (SamplingStrategyDTO strategyDTO : samplingStrategies) {
             // 转换为实体对象
             SpcSamplingStrategy entity = ObjectConvertUtil.convert(strategyDTO, SpcSamplingStrategy.class);
@@ -203,5 +208,34 @@ public class SpcSamplingStrategyServiceImpl extends ServiceImpl<SpcSamplingStrat
     @Override
     public void deleteByJobId(String jobId) {
         spcSamplingStrategyMapper.deleteByJobId(jobId);
+    }
+
+    /**
+     * 检查采样策略列表中是否有重复的 periodS
+     * 同一个 jobId 下不能有两个相同 periodS 的策略（唯一约束: job_id + period_s）
+     *
+     * @param samplingStrategies 采样策略列表
+     * @param jobId 作业ID
+     */
+    private void checkDuplicatePeriodS(List<SamplingStrategyDTO> samplingStrategies, String jobId) {
+        if (CollectionUtil.isEmpty(samplingStrategies)) {
+            return;
+        }
+
+        // 检查传入列表中是否有重复的 periodS
+        Map<Integer, Long> periodSCountMap = samplingStrategies.stream()
+                .filter(s -> s.getPeriodS() != null)
+                .collect(Collectors.groupingBy(SamplingStrategyDTO::getPeriodS, Collectors.counting()));
+
+        List<Integer> duplicatePeriods = periodSCountMap.entrySet().stream()
+                .filter(entry -> entry.getValue() > 1)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        if (CollectionUtil.isNotEmpty(duplicatePeriods)) {
+            throw new com.px.ifp.common.exception.BusinessException(
+                    "采样策略配置中存在重复的采样周期(period_s): " + duplicatePeriods +
+                    "，同一个指标配置下不能有相同采样周期的策略");
+        }
     }
 }
