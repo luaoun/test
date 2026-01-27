@@ -2011,6 +2011,11 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         }
 
         for (SamplingStrategyDTO strategy : samplingStrategies) {
+            // 设置 windowType 默认值为 tumble
+            if (strategy.getWindowType() == null || strategy.getWindowType().trim().isEmpty()) {
+                strategy.setWindowType("tumble");
+            }
+
             // 只处理 periodic 类型的策略
             if (!"periodic".equalsIgnoreCase(strategy.getStrategyType())) {
                 continue;
@@ -2030,8 +2035,8 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
                 // 对于 periodic 策略，windowSizeS 默认等于 periodS
                 strategy.setWindowSizeS(periodSeconds);
 
-                log.info("自动填充采样策略参数: periodLabel={}, periodS={}, windowSizeS={}",
-                        periodLabel, periodSeconds, periodSeconds);
+                log.info("自动填充采样策略参数: periodLabel={}, periodS={}, windowSizeS={}, windowType={}",
+                        periodLabel, periodSeconds, periodSeconds, strategy.getWindowType());
             }
         }
     }
