@@ -316,6 +316,32 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
     }
 
     /**
+     * 将 SpcPointMetadataDO 列表转换为 SpcAnalysisDTO 列表，并手动映射必要字段
+     * @param entityList SpcPointMetadataDO 实体列表
+     * @return SpcAnalysisDTO 列表
+     */
+    private List<SpcAnalysisDTO> convertToSpcAnalysisDTOList(List<SpcPointMetadataDO> entityList) {
+        if (CollectionUtil.isEmpty(entityList)) {
+            return new ArrayList<>();
+        }
+        List<SpcAnalysisDTO> dtoList = ObjectConvertUtil.convertList(entityList, SpcAnalysisDTO.class);
+        // 手动映射 ObjectConvertUtil 未能自动映射的字段
+        for (int i = 0; i < dtoList.size(); i++) {
+            SpcAnalysisDTO dto = dtoList.get(i);
+            SpcPointMetadataDO entity = entityList.get(i);
+            // 映射 enableRealtimeAlarm 到 status
+            dto.setStatus(entity.getEnableRealtimeAlarm());
+            // 映射相关字段
+            dto.setPoint(entity.getMeasureCode());
+            dto.setPointName(entity.getMeasureName());
+            dto.setStep(entity.getYAxisStep());
+            dto.setStartValue(entity.getYAxisMin());
+            dto.setEndValue(entity.getYAxisMax());
+        }
+        return dtoList;
+    }
+
+    /**
      * 清理指标相关的Redis缓存
      */
     private void clearIndicatorRedisCache(Long indicatorId) {
@@ -554,15 +580,8 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
             return null;
         }
         Map<String, Object> classDictMap = dictService.getLocalCache(DictConstant.CLASS_NAME);
-        List<SpcAnalysisDTO> spcAnalysisDTOList = ObjectConvertUtil.convertList(spcIndicatorDOList, SpcAnalysisDTO.class);
+        List<SpcAnalysisDTO> spcAnalysisDTOList = convertToSpcAnalysisDTOList(spcIndicatorDOList);
         List<String> pointList = new ArrayList<>();
-
-        // 手动映射 enableRealtimeAlarm 到 status
-        for (int i = 0; i < spcAnalysisDTOList.size(); i++) {
-            SpcAnalysisDTO dto = spcAnalysisDTOList.get(i);
-            SpcPointMetadataDO indicatorDO = spcIndicatorDOList.get(i);
-            dto.setStatus(indicatorDO.getEnableRealtimeAlarm());
-        }
 
         if (MapUtil.isNotEmpty(classDictMap)) {
             spcAnalysisDTOList.forEach(dto -> {
@@ -691,12 +710,8 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         //  要查询的Scada点位清单
         List<String> pointList = new ArrayList<>();
         if (!CollectionUtil.isEmpty(spcIndicatorDOList)) {
-            spcAnalysisDTOList = ObjectConvertUtil.convertList(spcIndicatorDOList, SpcAnalysisDTO.class);
-            // 手动映射 enableRealtimeAlarm 到 status
-            for (int i = 0; i < spcAnalysisDTOList.size(); i++) {
-                spcAnalysisDTOList.get(i).setStatus(spcIndicatorDOList.get(i).getEnableRealtimeAlarm());
-            }
-            spcAnalysisDTOList.stream().forEach(e -> pointList.add(e.getMeasureCode()));
+            spcAnalysisDTOList = convertToSpcAnalysisDTOList(spcIndicatorDOList);
+            spcAnalysisDTOList.forEach(e -> pointList.add(e.getMeasureCode()));
         }
 
         //2.检查 入参 point是否都在 要查询的spcIndicatorDOList 里了

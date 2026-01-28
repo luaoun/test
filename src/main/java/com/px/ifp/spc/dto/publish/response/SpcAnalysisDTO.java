@@ -67,7 +67,7 @@ public class SpcAnalysisDTO extends BaseBean {
     private BigDecimal step;
 
     @Schema(description = "步长")
-    private BigDecimal yAxisStep替代;
+    private BigDecimal yAxisStep;
 
     @Deprecated
     @Schema(description = "Y轴起始值")
