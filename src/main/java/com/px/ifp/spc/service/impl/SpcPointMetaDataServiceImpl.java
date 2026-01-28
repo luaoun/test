@@ -223,6 +223,15 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         spcIndicatorDO.setPrecisionDecimal(reqDTO.getPrecisionDecimal());
         spcIndicatorDO.setRangeMin(reqDTO.getRangeMin());
         spcIndicatorDO.setRangeMax(reqDTO.getRangeMax());
+        if(reqDTO.getStartValue() != null) {
+            spcIndicatorDO.setYAxisMin(reqDTO.getStartValue());
+        }
+        if(reqDTO.getEndValue() != null) {
+            spcIndicatorDO.setYAxisMax(reqDTO.getEndValue());
+        }
+        if(reqDTO.getStep() != null) {
+            spcIndicatorDO.setYAxisStep(reqDTO.getStep());
+        }
         spcIndicatorDO.setYAxisMin(reqDTO.getYAxisMin());
         spcIndicatorDO.setYAxisMax(reqDTO.getYAxisMax());
         spcIndicatorDO.setYAxisStep(reqDTO.getYAxisStep());
@@ -392,7 +401,7 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
                         SamplingStrategyDTO dto = ObjectConvertUtil.convert(strategy, SamplingStrategyDTO.class);
                         // 将 features 字符串转换为 List<String>
                         if (StrUtil.isNotBlank(strategy.getFeatures())) {
-                            dto.setFeatures(Arrays.asList(strategy.getFeatures().split(",")));
+                            dto.setFeatures(strategy.getFeatures());
                         }
                         return dto;
                     })
@@ -472,7 +481,7 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
                         SamplingStrategyDTO dto = ObjectConvertUtil.convert(strategy, SamplingStrategyDTO.class);
                         // 将 features 字符串转换为 List<String>
                         if (StrUtil.isNotBlank(strategy.getFeatures())) {
-                            dto.setFeatures(Arrays.asList(strategy.getFeatures().split(",")));
+                            dto.setFeatures(strategy.getFeatures());
                         }
                         return dto;
                     })
@@ -684,7 +693,7 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
             for (int i = 0; i < spcAnalysisDTOList.size(); i++) {
                 spcAnalysisDTOList.get(i).setStatus(spcIndicatorDOList.get(i).getEnableRealtimeAlarm());
             }
-            spcAnalysisDTOList.stream().forEach(e -> pointList.add(e.getPoint()));
+            spcAnalysisDTOList.stream().forEach(e -> pointList.add(e.getMeasureCode()));
         }
 
         //2.检查 入参 point是否都在 要查询的spcIndicatorDOList 里了
@@ -764,7 +773,7 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         //循环设置每个point曲线的 报警批注Note数据
         for (SpcAnalysisDTO spcAnalysisDTO : spcAnalysisDTOList) {
             //4.1 获取点位的scada曲线数据
-            List<CommonTimeStat> scadaDataStatList = scadaDataStatMap.get(spcAnalysisDTO.getPoint());
+            List<CommonTimeStat> scadaDataStatList = scadaDataStatMap.get(spcAnalysisDTO.getMeasureCode());
             //4.2 按点位查询批注信息
             List<SpcAlarmNoteBO> spcAlarmNoteList = null;
             if (Objects.isNull(reqDTO.getSpcAnalysisResultId())) {
@@ -829,13 +838,13 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
             timeFormat = "yyyy-MM";
         }
         for (SpcAnalysisDTO spcAnalysisDTO : spcAnalysisDTOList) {
-            List<CommonTimeStat> dataStatList = scadaDataStatMap.get(spcAnalysisDTO.getPoint());
+            List<CommonTimeStat> dataStatList = scadaDataStatMap.get(spcAnalysisDTO.getMeasureCode());
             for(CommonTimeStat commonTimeStat:dataStatList){
                 if(Objects.nonNull(commonTimeStat.getValue())) {
                     BigDecimal pointValue = NumberUtil.autoAdjustByRatioAndScale(commonTimeStat.getValue(), radio, scale);
                     commonTimeStat.setValue(pointValue);
                 }
-                commonTimeStat.setPoint(spcAnalysisDTO.getPoint());
+                commonTimeStat.setPoint(spcAnalysisDTO.getMeasureCode());
             }
             spcAnalysisDTO.setPointValues(dataStatList);
             if (CollectionUtil.isEmpty(dataStatList)){
@@ -863,7 +872,7 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
     private void getSpcFeatureData(Map<String, List<CommonTimeStat>> scadaDataStatMap, String timePeriod, List<SpcAnalysisDTO> spcAnalysisDTOList,String[] indicators,int radio,int scale) {
         if (scadaDataStatMap == null) return;
         for (SpcAnalysisDTO spcAnalysisDTO : spcAnalysisDTOList) {
-            List<CommonTimeStat> dataStatList = scadaDataStatMap.get(spcAnalysisDTO.getPoint());
+            List<CommonTimeStat> dataStatList = scadaDataStatMap.get(spcAnalysisDTO.getMeasureCode());
 //            for(CommonTimeStat commonTimeStat:dataStatList){
 //                if(Objects.nonNull(commonTimeStat.getValue())) {
 //                    BigDecimal pointValue = NumberUtil.autoAdjustByRatioAndScale(commonTimeStat.getValue(), radio, scale);

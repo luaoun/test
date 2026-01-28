@@ -1,7 +1,6 @@
 package com.px.ifp.spc.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.px.ifp.common.utils.ObjectConvertUtil;
 import com.px.ifp.spc.dto.manager.request.SamplingStrategyDTO;
@@ -89,12 +88,7 @@ public class SpcSamplingStrategyServiceImpl extends ServiceImpl<SpcSamplingStrat
             // 设置指标编码
             entity.setMeasureCode(measureCode);
 
-            // 将 features List<String> 转换为逗号分隔的字符串
-            if (strategyDTO.getFeatures() != null && !strategyDTO.getFeatures().isEmpty()) {
-                entity.setFeatures(String.join(",", strategyDTO.getFeatures()));
-            } else {
-                entity.setFeatures(null);
-            }
+            entity.setFeatures(strategyDTO.getFeatures());
 
             if (strategyDTO.getId() != null) {
                 // 如果有ID，执行更新
@@ -148,11 +142,12 @@ public class SpcSamplingStrategyServiceImpl extends ServiceImpl<SpcSamplingStrat
             entity.setJobId(jobId);
 
             // 将 features List<String> 转换为逗号分隔的字符串
-            if (strategyDTO.getFeatures() != null && !strategyDTO.getFeatures().isEmpty()) {
-                entity.setFeatures(String.join(",", strategyDTO.getFeatures()));
-            } else {
-                entity.setFeatures(null);
-            }
+//            if (strategyDTO.getFeatures() != null && !strategyDTO.getFeatures().isEmpty()) {
+//                entity.setFeatures(String.join(",", strategyDTO.getFeatures()));
+//            } else {
+//                entity.setFeatures(null);
+//            }
+            entity.setFeatures(strategyDTO.getFeatures());
 
             if (strategyDTO.getId() != null) {
                 // 如果有ID，执行更新

@@ -5,7 +5,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * SPC 采样策略 DTO
@@ -67,8 +66,8 @@ public class SamplingStrategyDTO implements Serializable {
     @Schema(description = "告警模式持续时间")
     private Integer alertDurationS;
 
-    @Schema(description = "统计特征列表")
-    private List<String> features;
+    @Schema(description = "统计特征")
+    private String features;
 
     @Schema(description = "计算方式：realtime/batch/hybrid")
     private String computationMode;

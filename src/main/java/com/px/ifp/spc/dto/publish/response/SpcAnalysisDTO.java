@@ -45,23 +45,43 @@ public class SpcAnalysisDTO extends BaseBean {
     @Schema(description = "指标名称")
     private String indicatorName;
 
+    @Deprecated
     @Schema(description = "点位")
     private String point;
 
+    @Schema(description = "指标编码")
+    private String measureCode;
+
+    @Deprecated
     @Schema(description = "点位名称")
     private String pointName;
+
+    @Schema(description = "指标名称")
+    private String measureName;
 
     @Schema(description = "点位单位")
     private String pointUnit;
 
+    @Deprecated
     @Schema(description = "步长")
     private BigDecimal step;
 
+    @Schema(description = "步长")
+    private BigDecimal yAxisStep替代;
+
+    @Deprecated
     @Schema(description = "Y轴起始值")
     private BigDecimal startValue;
 
+    @Schema(description = "Y轴起始值")
+    private BigDecimal yAxisMin;
+
+    @Deprecated
     @Schema(description = "Y轴结束值")
     private BigDecimal endValue;
+
+    @Schema(description = "Y轴结束值")
+    private BigDecimal yAxisMax;
 
     @Schema(description = "目标值")
     private BigDecimal targetValue;
