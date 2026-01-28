@@ -49,8 +49,10 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public Map<String, List<CommonTimeStat>> queryScadaData(String[] points, String bucketUnit, Integer bucketWidth,String[] indicators, Date startTime, Date endTime) {
         ScadaIndicatorDTO scadaIndicatorDTO = new ScadaIndicatorDTO();
-        scadaIndicatorDTO.setBucketUnit(bucketUnit);
-        scadaIndicatorDTO.setBucketWidth(bucketWidth);
+        if(bucketUnit != null)
+            scadaIndicatorDTO.setBucketUnit(bucketUnit);
+        if(bucketWidth != null)
+            scadaIndicatorDTO.setBucketWidth(bucketWidth);
         scadaIndicatorDTO.setStartTime(startTime);
         scadaIndicatorDTO.setEndTime(endTime);
         scadaIndicatorDTO.setPoint(points);
