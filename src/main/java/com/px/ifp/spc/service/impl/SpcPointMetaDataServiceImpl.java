@@ -225,16 +225,19 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
         spcIndicatorDO.setRangeMax(reqDTO.getRangeMax());
         if(reqDTO.getStartValue() != null) {
             spcIndicatorDO.setYAxisMin(reqDTO.getStartValue());
+        }else {
+            spcIndicatorDO.setYAxisMin(reqDTO.getYAxisMin());
         }
         if(reqDTO.getEndValue() != null) {
             spcIndicatorDO.setYAxisMax(reqDTO.getEndValue());
+        }else {
+            spcIndicatorDO.setYAxisMax(reqDTO.getYAxisMax());
         }
         if(reqDTO.getStep() != null) {
             spcIndicatorDO.setYAxisStep(reqDTO.getStep());
+        }else {
+            spcIndicatorDO.setYAxisStep(reqDTO.getYAxisStep());
         }
-        spcIndicatorDO.setYAxisMin(reqDTO.getYAxisMin());
-        spcIndicatorDO.setYAxisMax(reqDTO.getYAxisMax());
-        spcIndicatorDO.setYAxisStep(reqDTO.getYAxisStep());
         Boolean enabledRealtimeAlaram = reqDTO.getEnableRealtimeAlarm();
         if(reqDTO.getStatus() != null) enabledRealtimeAlaram = reqDTO.getStatus();
         spcIndicatorDO.setEnableRealtimeAlarm(enabledRealtimeAlaram);
