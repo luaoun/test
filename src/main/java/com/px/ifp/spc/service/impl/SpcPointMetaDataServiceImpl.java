@@ -44,10 +44,7 @@ import com.px.ifp.spc.dto.manager.response.SpcAnalysisResultDTO;
 import com.px.ifp.spc.dto.manager.response.SpcNoteDTO;
 import com.px.ifp.spc.dto.publish.request.*;
 import com.px.ifp.spc.dto.publish.response.*;
-import com.px.ifp.spc.entity.SpcAlarmEvent;
-import com.px.ifp.spc.entity.SpcAnalysisResult;
-import com.px.ifp.spc.entity.SpcNoteDO;
-import com.px.ifp.spc.entity.SpcPointMetadataDO;
+import com.px.ifp.spc.entity.*;
 import com.px.ifp.spc.enums.PointMetaDataTypeEnum;
 import com.px.ifp.spc.error.OperationError;
 import com.px.ifp.spc.mapper.SpcAlarmEventMapper;
@@ -331,12 +328,24 @@ public class SpcPointMetaDataServiceImpl extends ServiceImpl<SpcPointMetadataMap
             SpcPointMetadataDO entity = entityList.get(i);
             // 映射 enableRealtimeAlarm 到 status
             dto.setStatus(entity.getEnableRealtimeAlarm());
-            // 映射相关字段
+            // 映射图表相关字段
+            dto.setMeasureCode(entity.getMeasureCode());
+            dto.setMeasureName(entity.getMeasureName());
+            dto.setYAxisStep(entity.getYAxisStep());
+            dto.setYAxisMin(entity.getYAxisMin());
+            dto.setYAxisMax(entity.getYAxisMax());
+            // 兼容旧字段（已废弃）
             dto.setPoint(entity.getMeasureCode());
             dto.setPointName(entity.getMeasureName());
             dto.setStep(entity.getYAxisStep());
             dto.setStartValue(entity.getYAxisMin());
             dto.setEndValue(entity.getYAxisMax());
+            // 查询并设置采样策略
+            List<SpcSamplingStrategy> strategies = spcSamplingStrategyService.selectByJobId(entity.getJobId());
+            if (CollectionUtil.isNotEmpty(strategies)) {
+                List<SamplingStrategyDTO> strategyDTOs = ObjectConvertUtil.convertList(strategies, SamplingStrategyDTO.class);
+                dto.setSamplingStrategies(strategyDTOs);
+            }
         }
         return dtoList;
     }

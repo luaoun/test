@@ -4,6 +4,7 @@ import com.px.ifp.common.bean.common.BaseBean;
 import com.px.ifp.spc.bo.AlarmXis;
 import com.px.ifp.spc.bo.CommonStat;
 import com.px.ifp.spc.bo.CommonTimeStat;
+import com.px.ifp.spc.dto.manager.request.SamplingStrategyDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -156,4 +157,7 @@ public class SpcAnalysisDTO extends BaseBean {
     private Boolean status;
 
     List<AlarmXis> alarmTags;
+
+    @Schema(description = "采样策略配置列表")
+    private List<SamplingStrategyDTO> samplingStrategies;
 }
