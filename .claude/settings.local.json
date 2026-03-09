@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn spring-boot:run:*)",
+      "Bash(tee:*)",
+      "Bash(lsof:*)",
+      "Bash(docker pull:*)",
+      "Bash(curl:*)",
+      "Bash(mysql:*)",
+      "Bash(docker run:*)",
+      "Bash(docker logs:*)",
+      "Bash(mvn clean compile:*)",
+      "Bash(mvn compile:*)",
+      "Bash(redis-cli:*)",
+      "Bash(for i in 1 2 3)",
+      "Bash(do echo \"Attempt $i:\")",
+      "Bash(done)",
+      "Bash(python3 -m json.tool:*)",
+      "Bash(docker inspect:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker volume rm:*)",
+      "Bash(docker volume create:*)",
+      "Bash(docker start:*)",
+      "Bash(docker images --format \"table {{.Repository}}\\\\t{{.Tag}}\\\\t{{.Size}}\")",
+      "Bash(cat /Users/luaoun/Documents/gitea/ifp-spc-dev/src/main/resources/application.yml 2>/dev/null || find /Users/luaoun/Documents/gitea/ifp-spc-dev/src/main/resources -name \"*.yml\" -o -name \"*.yaml\" -o -name \"*.properties\" | head -20)",
+      "Bash(docker network ls)",
+      "Bash(docker compose -f docker-compose-dev.yml up -d 2>&1)",
+      "Bash(sudo lsof -i :3307 -sTCP:LISTEN 2>/dev/null || lsof -nP -i :3307 | grep LISTEN)",
+      "Bash(netstat -anp tcp 2>/dev/null | grep \"*.3307\")",
+      "Bash(netstat -vanp tcp 2>/dev/null | grep \"\\\\.3307 \" | head -10)",
+      "Bash(ps -p 311 -o pid,comm,args 2>/dev/null)",
+      "Bash(/usr/local/mysql/bin/mysql -u root -P 3307 -h 127.0.0.1 -e \"SHOW DATABASES;\" 2>&1 | head -20)",
+      "Bash(/usr/local/mysql/bin/mysql -u root -proot -P 3307 -h 127.0.0.1 -e \"SHOW DATABASES;\" 2>&1 | head -20)",
+      "Bash(docker compose -f docker-compose-dev.yml down spc-nacos spc-mysql 2>&1; docker compose -f docker-compose-dev.yml up -d 2>&1)",
+      "Bash(docker compose -f /Users/luaoun/Documents/gitea/ifp-spc-dev/docker-compose-dev.yml up -d kafka-ui 2>&1)",
+      "Bash(docker compose -f /Users/luaoun/Documents/gitea/ifp-spc-dev/docker-compose-dev.yml up -d --force-recreate tdengine 2>&1)"
+    ]
+  }
+}
