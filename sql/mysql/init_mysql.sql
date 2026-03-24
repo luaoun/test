@@ -117,3 +117,46 @@ CREATE TABLE `spc_sampling_strategy` (
  KEY `idx_spc_sampling_strategy_job_id` (`job_id`),
  KEY `idx_spc_sampling_strategy_job_id_period` (`job_id`,`period_s`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='SPC 采样策略配置表';
+
+
+-- `ifp-operation`.spc_chart_config definition
+
+CREATE TABLE `spc_chart_config` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `point_id` varchar(64) NOT NULL COMMENT '点位ID',
+    `chart_type` varchar(16) NOT NULL COMMENT '控制图类型：I-MR/EWMA/Xbar-R/CUSUM/p/c/u',
+    `chart_name` varchar(128) DEFAULT NULL COMMENT '控制图名称',
+    `baseline_window_days` int(11) DEFAULT '7' COMMENT '基线窗口天数（7/14/30）',
+    `baseline_update_freq` varchar(16) DEFAULT 'daily' COMMENT '基线更新频率：hourly/daily/weekly',
+    `baseline_version` varchar(32) DEFAULT NULL COMMENT '当前基线版本',
+    `limit_calc_mode` enum('auto','manual','hybrid') DEFAULT 'auto' COMMENT '控制限计算模式：auto=基线自动计算, manual=手动固定, hybrid=混合',
+    `use_3sigma` tinyint(1) DEFAULT '1' COMMENT '是否使用 3σ 控制限',
+    `sigma_multiplier` decimal(3,1) DEFAULT '3.0' COMMENT 'σ 倍数（通常为 3.0）',
+    `ucl` decimal(15,6) DEFAULT NULL COMMENT '固定控制上限（UCL）',
+    `lcl` decimal(15,6) DEFAULT NULL COMMENT '固定控制下限（LCL）',
+    `uwl` decimal(15,6) DEFAULT NULL COMMENT '固定警告上限（UWL）',
+    `lwl` decimal(15,6) DEFAULT NULL COMMENT '固定警告下限（LWL）',
+    `usl` decimal(15,6) DEFAULT NULL COMMENT '上规格限（USL）',
+    `lsl` decimal(15,6) DEFAULT NULL COMMENT '下规格限（LSL）',
+    `target_value` decimal(15,6) DEFAULT NULL COMMENT '目标值（Target）',
+    `rule_r1_enabled` tinyint(1) DEFAULT '1' COMMENT 'R1: 单点超出 3σ',
+    `rule_r2_enabled` tinyint(1) DEFAULT '1' COMMENT 'R2: 连续 9 点同侧',
+    `rule_r3_enabled` tinyint(1) DEFAULT '1' COMMENT 'R3: 连续 6 点递增/递减',
+    `rule_r4_enabled` tinyint(1) DEFAULT '1' COMMENT 'R4: 连续 14 点交替',
+    `rule_r5_enabled` tinyint(1) DEFAULT '1' COMMENT 'R5: 3 点中 2 点超 2σ',
+    `rule_r6_enabled` tinyint(1) DEFAULT '1' COMMENT 'R6: 5 点中 4 点超 1σ',
+    `rule_r7_enabled` tinyint(1) DEFAULT '1' COMMENT 'R7: 15 点在 1σ 内',
+    `rule_r8_enabled` tinyint(1) DEFAULT '1' COMMENT 'R8: 8 点在 1σ 外',
+    `alarm_enabled` tinyint(1) DEFAULT '1' COMMENT '是否启用告警',
+    `alarm_severity` tinyint(4) DEFAULT '2' COMMENT '告警严重度（1-4）',
+    `enabled` tinyint(1) DEFAULT '1' COMMENT '是否启用',
+    `status` varchar(16) DEFAULT 'active' COMMENT '状态：active/inactive',
+    `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_point_chart` (`point_id`,`chart_type`),
+    KEY `idx_chart_type` (`chart_type`),
+    KEY `idx_enabled` (`enabled`),
+    KEY `idx_limit_calc_mode` (`limit_calc_mode`),
+    CONSTRAINT `spc_chart_config_ibfk_1` FOREIGN KEY (`point_id`) REFERENCES `spc_sampling_strategy` (`measure_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='SPC 控制图配置表（V2）';
